@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>四平台接单监控 · GitHub Pages 实时版</title>
+<style>
+:root{
+  --bg:#f4f6fa;--card:#fff;--ink:#1b2436;--sub:#6b7688;--line:#e8ecf3;
+  --brand:#2563eb;--ok:#16a34a;--warn:#f59e0b;--bad:#ef4444;
+  --shadow:0 4px 20px rgba(30,50,90,.07);--radius:14px;
+  --p1:#7c3aed;--p2:#2563eb;--p3:#0891b2;--p4:#ea580c;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink);line-height:1.5;font-size:14px}
+.wrap{max-width:1360px;margin:0 auto;padding:22px 18px 60px}
+header{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--brand),#0ea5e9);color:#fff;display:grid;place-items:center;font-size:22px;box-shadow:0 6px 16px rgba(37,99,235,.28)}
+h1{font-size:20px;font-weight:750}
+.brand p{color:var(--sub);font-size:12px;margin-top:2px}
+.hd-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.pill{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:7px 14px;font-size:12px;color:var(--sub);box-shadow:var(--shadow)}
+.pill b{color:var(--ink)}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--bad);margin-right:6px}
+.dot.on{background:var(--ok);box-shadow:0 0 0 4px rgba(22,163,74,.15)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+.stat{background:var(--card);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow);border:1px solid var(--line)}
+.stat .lab{color:var(--sub);font-size:12px}
+.stat .val{font-size:30px;font-weight:800;margin-top:8px}
+.stat .hint{font-size:11px;color:var(--sub);margin-top:4px}
+.stat.c1 .val{color:var(--brand)}.stat.c2 .val{color:var(--ok)}.stat.c3 .val{color:var(--warn)}.stat.c4 .val{color:var(--p1)}
+.panel{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid var(--line)}
+.pad{padding:18px 20px}
+.title{font-weight:700;font-size:15px;display:flex;align-items:center;gap:8px}
+.title .bar{width:3px;height:16px;border-radius:2px;background:var(--brand)}
+.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.spread{justify-content:space-between}
+.mb{margin-bottom:16px}
+button{font-family:inherit;cursor:pointer;border:none;outline:none;transition:.15s}
+.btn{border:1px solid var(--line);background:#fff;color:var(--ink);padding:9px 15px;border-radius:9px;font-size:13px;font-weight:600}
+.btn:hover{border-color:var(--brand);color:var(--brand)}
+.btn.primary{background:var(--brand);color:#fff;border-color:var(--brand)}
+.chips{display:flex;gap:7px;flex-wrap:wrap}
+.chip{padding:6px 12px;border-radius:8px;border:1px solid var(--line);background:#fff;font-size:12px;color:var(--sub);font-weight:600;cursor:pointer}
+.chip.active{background:var(--brand);color:#fff;border-color:var(--brand)}
+.grid{display:grid;grid-template-columns:1fr 320px;gap:18px;align-items:start}
+@media(max-width:1000px){.grid{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}}
+.list{max-height:620px;overflow:auto}
+.order{border:1px solid var(--line);border-radius:11px;padding:13px 14px;margin-bottom:10px;cursor:pointer;transition:.15s}
+.order:hover{border-color:var(--brand);box-shadow:0 4px 14px rgba(37,99,235,.1)}
+.o-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.plat{font-size:11px;font-weight:700;color:#fff;padding:3px 9px;border-radius:6px}
+.plat.匠多多{background:var(--p1)}.plat.鲁班{background:var(--p2)}.plat.工奇兵{background:var(--p3)}.plat.万师傅{background:var(--p4)}
+.status{font-size:11px;font-weight:700;padding:3px 9px;border-radius:6px;margin-left:auto;background:#fff7ed;color:#c2410c}
+.status.quoted{background:#f0fdf4;color:#15803d}.status.skipped{background:#f1f5f9;color:#64748b}
+.o-title{font-weight:700;font-size:14px;margin-bottom:6px}
+.o-meta{display:flex;gap:14px;flex-wrap:wrap;color:var(--sub);font-size:12px}
+.o-bottom{display:flex;justify-content:space-between;align-items:center;margin-top:9px;padding-top:9px;border-top:1px dashed var(--line)}
+.price{font-weight:800;color:var(--ok);font-size:16px}
+.empty{text-align:center;color:var(--sub);padding:50px 20px}
+.rule{padding:12px 0;border-bottom:1px solid var(--line)}
+.rule:last-child{border-bottom:none}
+.rule label{display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:7px}
+input[type=number],input[type=text]{width:100%;border:1px solid var(--line);border-radius:8px;padding:9px 11px;font-family:inherit;font-size:13px}
+.sw{display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;user-select:none}
+.sw input{display:none}.sw i{width:38px;height:22px;border-radius:999px;background:#cbd5e1;position:relative;transition:.2s}
+.sw i::after{content:"";position:absolute;width:16px;height:16px;border-radius:50%;background:#fff;top:3px;left:3px;transition:.2s}
+.sw input:checked+i{background:var(--brand)}.sw input:checked+i::after{left:19px}
+.logs{max-height:180px;overflow:auto;font-size:12px;color:var(--sub)}
+.logs div{padding:5px 0;border-bottom:1px dashed var(--line)}
+footer{text-align:center;color:var(--sub);font-size:11px;margin-top:26px;line-height:1.8}
+.toast{position:fixed;left:50%;top:22px;transform:translateX(-50%) translateY(-20px);background:var(--ink);color:#fff;padding:11px 20px;border-radius:10px;font-size:13px;z-index:200;opacity:0;transition:.25s;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.setup{background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:14px 18px;margin-bottom:18px;font-size:13px;color:#92400e}
+.setup code{background:#fff;padding:2px 6px;border-radius:4px;font-size:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="brand"><div class="logo">🛠</div><div><h1>四平台接单监控</h1><p>匠多多 · 鲁班 · 工奇兵 · 万师傅　|　GitHub Pages 实时版</p></div></div>
+  <div class="hd-right">
+    <span class="pill"><span class="dot" id="srcDot"></span>数据源：<b id="srcTxt">GitHub</b></span>
+    <span class="pill">刷新 <b id="clock">--:--:--</b></span>
+  </div>
+</header>
+
+<div class="setup" id="setupTip">
+  ⚙️ 部署提示：把本目录推到你的 GitHub 仓库并开启 Pages；油猴脚本抓到的订单通过 <code>api.github.com</code> 写仓库里的 <code>data/orders.json</code>，页面通过 jsDelivr 实时读取。
+</div>
+
+<div class="stats">
+  <div class="stat c1"><div class="lab">📦 今日新单</div><div class="val" id="sNew">0</div><div class="hint">四平台实时订单</div></div>
+  <div class="stat c2"><div class="lab">✅ 今日已报价</div><div class="val" id="sQuote">0</div><div class="hint">自动 + 手动</div></div>
+  <div class="stat c3"><div class="lab">⏭ 今日跳过</div><div class="val" id="sSkip">0</div><div class="hint">不符合规则</div></div>
+  <div class="stat c4"><div class="lab">💰 预计收入</div><div class="val" id="sIncome">¥0</div><div class="hint">报价合计</div></div>
+</div>
+
+<div class="panel pad mb">
+  <div class="row spread">
+    <div class="row">
+      <button class="btn primary" id="btnRefresh">🔄 立即刷新</button>
+      <button class="btn" id="btnAuto">⏸ 自动刷新：开</button>
+    </div>
+    <div class="row"><span class="pill">每 <b id="secVal">10</b> 秒刷新</span></div>
+  </div>
+</div>
+
+<div class="grid">
+  <div class="panel pad">
+    <div class="title mb"><span class="bar"></span>订单池 <span style="font-size:11px;color:var(--sub);font-weight:400">实时数据</span></div>
+    <div class="chips mb" id="platChips">
+      <span class="chip active" data-p="all">全部平台</span>
+      <span class="chip" data-p="匠多多">匠多多</span><span class="chip" data-p="鲁班">鲁班</span>
+      <span class="chip" data-p="工奇兵">工奇兵</span><span class="chip" data-p="万师傅">万师傅</span>
+    </div>
+    <div class="list" id="orderList"></div>
+  </div>
+  <div>
+    <div class="panel pad mb">
+      <div class="title mb"><span class="bar"></span>筛选规则</div>
+      <div class="rule"><label>最大距离 ≤ <span id="distV">5</span> km</label><input type="number" id="rDist" value="5"></div>
+      <div class="rule"><label>最低报价 ¥ <span id="minV">100</span> 起</label><input type="number" id="rMin" value="100"></div>
+      <div class="rule"><label>自动报价 <input type="checkbox" id="rAuto" checked></label></div>
+    </div>
+    <div class="panel pad"><div class="title mb"><span class="bar"></span>运行日志</div><div class="logs" id="logs"><div>就绪。</div></div></div>
+  </div>
+</div>
+
+<footer>
+  页面托管 GitHub Pages · 数据经 GitHub 仓库 + jsDelivr 中转 · 免费方案<br>
+  <b>订单由本地抓包脚本推送，页面只展示真实数据</b>
+</footer>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+'use strict';
+var $=function(s){return document.querySelector(s)};
+var $$=function(s){return Array.prototype.slice.call(document.querySelectorAll(s))};
+
+// ============ 配置：改成你自己的 ============
+var GH_USER='daima008';
+var GH_REPO='job-monitor';
+var GH_BRANCH='main';
+// 用 GitHub API 直接读（api.github.com 国内可达，无 CDN 缓存，实时性好）
+var DATA_API='https://api.github.com/repos/'+GH_USER+'/'+GH_REPO+'/contents/data/orders.json?ref='+GH_BRANCH;
+
+var orders=[],stats={new:0,quoted:0,skipped:0,income:0};
+var filterP='all',auto=true,timer=null,lastSig='';
+
+function log(t){var b=$('#logs');var d=document.createElement('div');d.textContent=new Date().toLocaleTimeString('zh-CN')+' '+t;b.insertBefore(d,b.firstChild);while(b.children.length>50)b.removeChild(b.lastChild)}
+function toast(m){var t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(function(){t.classList.remove('show')},2000)}
+
+function fetchData(){
+  var xhr=new XMLHttpRequest();
+  xhr.open('GET',DATA_API+'&t='+Date.now(),true);
+  xhr.timeout=12000;
+  xhr.setRequestHeader('Accept','application/vnd.github.v3.raw');
+  xhr.onreadystatechange=function(){
+    if(xhr.readyState!==4)return;
+    if(xhr.status===200){
+      try{
+        // GitHub contents API 带 Accept: raw 时直接返回文件内容
+        var j=JSON.parse(xhr.responseText);
+        $('#srcDot').classList.add('on');
+        var arr=j.orders||[];
+        var sig=JSON.stringify(arr.map(function(o){return String(o.id)+(o.status||'')}));
+        if(sig!==lastSig){lastSig=sig;orders=arr;stats=j.stats||calc();render();log('数据更新：'+arr.length+' 单')}
+        else{render()}
+      }catch(e){
+        // 若返回的是 base64（没带 raw），解一下
+        try{
+          var meta=JSON.parse(xhr.responseText);
+          if(meta.content){
+            var raw=decodeURIComponent(escape(atob(meta.content.replace(/\s/g,''))));
+            var j2=JSON.parse(raw);
+            $('#srcDot').classList.add('on');
+            orders=j2.orders||[];stats=j2.stats||calc();render();
+          }else{$('#srcDot').classList.remove('on')}
+        }catch(e2){$('#srcDot').classList.remove('on')}
+      }
+    }else{$('#srcDot').classList.remove('on')}
+  };
+  xhr.onerror=function(){$('#srcDot').classList.remove('on')};
+  xhr.send();
+}
+function calc(){
+  var s={new:orders.length,quoted:0,skipped:0,income:0};
+  orders.forEach(function(o){if(o.status==='quoted'){s.quoted++;s.income+=+(o.quote||o.price||0)}if(o.status==='skipped')s.skipped++});
+  return s;
+}
+function render(){
+  $('#sNew').textContent=stats.new;$('#sQuote').textContent=stats.quoted;
+  $('#sSkip').textContent=stats.skipped;$('#sIncome').textContent='¥'+stats.income;
+  var arr=orders.filter(function(o){return filterP==='all'||o.platform===filterP});
+  if(!arr.length){$('#orderList').innerHTML='<div class="empty"><b>暂无订单</b>等待抓包脚本推送数据</div>';return}
+  var h='';
+  arr.forEach(function(o){
+    var st=o.status||'pending';
+    h+='<div class="order"><div class="o-top"><span class="plat '+(o.platform||'')+'">'+(o.platform||'?')+'</span><span style="font-size:11px;color:var(--sub)">'+(o.time||'')+' · '+o.id+'</span><span class="status '+st+'">'+({pending:'待处理',quoted:'已报价',skipped:'已跳过'}[st]||st)+'</span></div>'
+      +'<div class="o-title">'+(o.title||'')+'</div>'
+      +'<div class="o-meta"><span>📍 '+(o.addr||'—')+' · '+(o.dist||0)+'km</span><span>🔧 '+(o.cat||'其他')+'</span><span>👷 '+(o.person||1)+'人</span></div>'
+      +'<div class="o-bottom"><span class="price">¥'+(o.price||0)+'</span>'+(o.quote?'<span style="font-size:11px;color:var(--brand)">已报 ¥'+o.quote+'</span>':'')+'</div></div>';
+  });
+  $('#orderList').innerHTML=h;
+}
+
+function bind(){
+  $('#btnRefresh').onclick=function(){fetchData();toast('刷新中')};
+  $('#btnAuto').onclick=function(){auto=!auto;this.textContent=auto?'⏸ 自动刷新：开':'▶ 自动刷新：关';restart()};
+  $$('#platChips .chip').forEach(function(c){c.onclick=function(){$$('#platChips .chip').forEach(function(x){x.classList.remove('active')});c.classList.add('active');filterP=c.dataset.p;render()}});
+  ['rDist','rMin'].forEach(function(id){$('#'+id).onchange=function(){if(id==='rDist')$('#distV').textContent=this.value;else $('#minV').textContent=this.value;saveCfg()}});
+  $('#rAuto').onchange=saveCfg;
+}
+function saveCfg(){try{localStorage.setItem('ghmon_cfg',JSON.stringify({dist:$('#rDist').value,min:$('#rMin').value,auto:$('#rAuto').checked}))}catch(e){}}
+function loadCfg(){try{var c=JSON.parse(localStorage.getItem('ghmon_cfg')||'{}');if(c.dist)$('#rDist').value=c.dist;$('#distV').textContent=$('#rDist').value;if(c.min)$('#rMin').value=c.min;$('#minV').textContent=$('#rMin').value;if(c.auto!==undefined)$('#rAuto').checked=c.auto}catch(e){}}
+function restart(){clearInterval(timer);if(auto)timer=setInterval(fetchData,10000)}
+function clock(){$('#clock').textContent=new Date().toLocaleTimeString('zh-CN')}
+
+loadCfg();bind();render();clock();fetchData();
+setInterval(clock,1000);restart();
+if(GH_USER.indexOf('__')===0){$('#setupTip').style.display='block';$('#srcTxt').textContent='未配置'}
+})();
+</script>
+</body>
+</html>
